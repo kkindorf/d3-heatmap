@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>D3 Heat Map</title>
+  <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <style>
+  body {
+    font: 10px sans-serif;
+  }
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  </style>
+
+</head>
+<body>
+  <svg class="chart">
+
+  </svg>
+  <script>
+    var margin = {top: 80, right: 40, bottom: 50, left: 40},
+    width = 992 - margin.left - margin.right,
+    height = 700 - margin.top - margin.bottom,
+        //      blue        light blue   green      l green    lime       yellow      amber     orange
+    colors = ['#0d47a1',  '#42a5f5',   '#33691e', '#9ccc65', '#cddc39', '#fff176', '#ffb300', '#ef6c00'];
+
+
+   //linear scale for y axis based on month
+    var y = d3.scale.linear()
+        .range([0, height])
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient('left')
+
+    var x = d3.scale.ordinal()
+        .rangeRoundBands([0, width]);
+
+
+
+
+
+    var chart = d3.select('.chart')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', 'translate('+ margin.left + ','+ margin.top +')');
+
+
+
+    d3.json('https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/global-temperature.json', function(data) {
+      var monthlyVariance = data.monthlyVariance;
+      var gridSize = monthlyVariance[monthlyVariance.length -1].year - monthlyVariance[0].year;
+
+      gridSize = Math.floor(width/gridSize);
+      console.log(gridSize)
+      x.domain(monthlyVariance.map(function(d) {return d.year;}))
+      y.domain([0, d3.max(monthlyVariance, function(d) {return d.month;})])
+
+      var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient('bottom')
+          .tickValues(x.domain().filter(function(d, i) { return !(i % 15 ); }))
+
+      chart.append('g')
+           .attr('class', 'x axis')
+           .attr('transform', 'translate(0,' + height + ')')
+           .call(xAxis);
+
+      chart.append('g')
+           .attr('class', 'y axis')
+           .call(yAxis)
+           .append('text')
+           .attr('transform', 'rotate(-90)')
+           .attr('y', 0)
+           .attr('dy', '-30px')
+           .attr('dx', '-'+(height/2) +'px')
+           .style('text-anchor', 'middle')
+           .style('font-size', '16px')
+           .text('Months');
+
+     chart.selectAll('.tile')
+          .data(monthlyVariance)
+          .enter().append('rect')
+          .attr('class', 'tile')
+          .attr('x', function(d, i) {return i * width})
+          .attr('y', function(d, i) {return i * height})
+          .attr('width', gridSize)
+          .attr('height', gridSize)
+
+
+
+
+
+    });
+
+  </script>
+</body>
+</html>
