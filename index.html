@@ -14,65 +14,147 @@
   .axis line {
     fill: none;
     stroke: #000;
-    shape-rendering: crispEdges;
+
   }
 
+  div.tooltip {
+   position: absolute;
+   text-align: center;
+   width: 130px;
+   height: 50px;
+   paddng: 10px;
+   font: 14px sans-serif;
+   background: gray;
+   border: 0px;
+   border-radius: 5px;
+   pointer-events: none;
+   font-weight: bold;
+ }
+ article {
+   width: 1100px;
+ }
+ header h1, h3, p {
+   text-align: center;
+ }
+ h1 {
+   font-size: 32px;
+ }
+ h3 {
+   font-size: 24px;
+ }
+ p {
+   font-size: 16px;
+ }
   </style>
 
 </head>
 <body>
-  <svg class="chart">
+<article>
+    <header>
+        <h1>Monthly Global Land-Surface Temperature</h1>
+        <h3>1753 - 2015</h3>
+        <p>Temperatures are in Celsius and reported as anomalies relative to the Jan 1951-Dec 1980 average. Estimated Jan 1951-Dec 1980 absolute temperature ℃: 8.66 +/- 0.07</p>
+    </header>
+    <div class="chart-container">
+        <svg class="chart">
+    </svg>
+    </div>
 
-  </svg>
+</article>
   <script>
-    var margin = {top: 80, right: 40, bottom: 50, left: 40},
-    width = 992 - margin.left - margin.right,
+
+
+    var cellSize = 5,//for padding around squares
+    margin = {top: 50, right: 60, bottom: 50, left: 80},
+    width = 1100 - margin.left - margin.right,
     height = 700 - margin.top - margin.bottom,
-        //      blue        light blue   green      l green    lime       yellow      amber     orange
-    colors = ['#0d47a1',  '#42a5f5',   '#33691e', '#9ccc65', '#cddc39', '#fff176', '#ffb300', '#ef6c00'];
-
-
-   //linear scale for y axis based on month
-    var y = d3.scale.linear()
-        .range([0, height])
-
-    var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient('left')
+    colors = ['#EDF8B1',  '#3D922E',   '#84C579', '#A173F9', '#7E79C5', '#E3F967'];
 
     var x = d3.scale.ordinal()
-        .rangeRoundBands([0, width]);
+        .rangeBands([0, width], 1.5);//the 1.5 gives us space away from y axis
 
+    var y = d3.scale.ordinal()
+            .rangeBands([0, height]);
 
-
+    var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient('left')
 
 
     var chart = d3.select('.chart')
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-        .attr('transform', 'translate('+ margin.left + ','+ margin.top +')');
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .append('g')
+            .attr('transform', 'translate('+ margin.left + ','+ margin.top +')');
 
-
+    var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
 
     d3.json('https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/global-temperature.json', function(data) {
       var monthlyVariance = data.monthlyVariance;
-      var gridSize = monthlyVariance[monthlyVariance.length -1].year - monthlyVariance[0].year;
+      console.log(data);
+      var base = data.baseTemperature;
 
-      gridSize = Math.floor(width/gridSize);
-      console.log(gridSize)
+      for (var i = 0; i < monthlyVariance.length; i++) {
+        if(monthlyVariance[i].month === 1) {
+          monthlyVariance[i].month = 'January';
+        }
+        else if(monthlyVariance[i].month === 2) {
+          monthlyVariance[i].month = 'February';
+        }
+        else if(monthlyVariance[i].month === 3) {
+          monthlyVariance[i].month = 'March';
+        }
+        else if(monthlyVariance[i].month === 4) {
+          monthlyVariance[i].month = 'April';
+        }
+        else if(monthlyVariance[i].month === 5) {
+          monthlyVariance[i].month = 'May';
+        }
+        else if(monthlyVariance[i].month === 6) {
+          monthlyVariance[i].month = 'June';
+        }
+        else if(monthlyVariance[i].month === 7) {
+          monthlyVariance[i].month = 'July';
+        }
+        else if(monthlyVariance[i].month === 8) {
+          monthlyVariance[i].month = 'August';
+        }
+        else if(monthlyVariance[i].month === 9) {
+          monthlyVariance[i].month = 'September';
+        }
+        else if(monthlyVariance[i].month === 10) {
+          monthlyVariance[i].month = 'October';
+        }
+        else if(monthlyVariance[i].month === 11) {
+          monthlyVariance[i].month = 'November';
+        }
+        else if(monthlyVariance[i].month === 12) {
+          monthlyVariance[i].month = 'December';
+        }
+      };
+
       x.domain(monthlyVariance.map(function(d) {return d.year;}))
-      y.domain([0, d3.max(monthlyVariance, function(d) {return d.month;})])
+      y.domain(monthlyVariance.map(function(d) {return d.month;}))
 
       var xAxis = d3.svg.axis()
-          .scale(x)
-          .orient('bottom')
-          .tickValues(x.domain().filter(function(d, i) { return !(i % 15 ); }))
+         .scale(x)
+         .orient('bottom')
+         .tickValues(x.domain().filter(function(d, i) { return !(i % 20); }))
 
       chart.append('g')
            .attr('class', 'x axis')
-           .attr('transform', 'translate(0,' + height + ')')
-           .call(xAxis);
+           .attr('transform','translate(0,' + height+')')
+           .call(xAxis)
+           .append('text')
+           .attr('y', 85)
+           .attr('dy', '-45px')
+           .attr('dx', (width/2) +'px')
+           .style('font-size', '20px')
+           .text('Years')
+           .style('fill', '#000')
+
 
       chart.append('g')
            .attr('class', 'y axis')
@@ -80,27 +162,72 @@
            .append('text')
            .attr('transform', 'rotate(-90)')
            .attr('y', 0)
-           .attr('dy', '-30px')
+           .attr('dy', '-45px')
            .attr('dx', '-'+(height/2) +'px')
            .style('text-anchor', 'middle')
-           .style('font-size', '16px')
+           .style('font-size', '20px')
            .text('Months');
 
-     chart.selectAll('.tile')
+      var cells = chart.selectAll('rect')
           .data(monthlyVariance)
-          .enter().append('rect')
-          .attr('class', 'tile')
-          .attr('x', function(d, i) {return i * width})
-          .attr('y', function(d, i) {return i * height})
-          .attr('width', gridSize)
-          .attr('height', gridSize)
+          .enter()
+          .append('g').append('rect')
+          .attr('class', 'cell')
+          .attr('width', cellSize)
+          .attr('height', cellSize + 45)
 
+          .attr('y', function(d) {return y(d.month) - cellSize})
+          .attr('x', function(d) {return x(d.year) - cellSize})
+          .style('fill', function(d) {
+            if(d.variance <= 0) {
+              return "#36169E";
+            }
+            else if (d.variance <= .27) {
+              return "#1E55AB";
+            }
+            else if (d.variance <= .39) {
+              return "#12B5B2";
+            }
+            else if(d.variance <= .5) {
+              return "#69C24B";
+            }
+            else if (d.variance <= .61) {
+              return "#A6C24B";
+            }
+            else if(d.variance <= .72) {
+              return "#FFFC80";
+            }
+            else if(d.variance <= .83) {
+              return "#FAC865";
+            }
+            else if(d.variance <= .94) {
+              return "#FAA356";
+            }
+            else if(d.variance <= 1.05) {
+              return "#FA8B74";
+            }
+            else if(d.variance <= 1.16) {
+              return "#FA595D";
+            }
+            else if(d.variance > 1.17 ){
+              return "#AD1518";
+            }
+          })
+          .on('mouseover', function(d) {
+           div.transition()
+              .duration(200)
+              .style('opacity', .9)
+              div.html(d.year + '-'+d.month +'<br/>' +'Temp: '+ (base + d.variance).toFixed(3) + '&deg;C'  +'<br/>' + d.variance+ '&deg;C'   )
+              .style('left', (d3.event.pageX) + 'px')
+              .style('top', (d3.event.pageY - 28)+ 'px')
+          })
+          .on('mouseout', function(d) {
+            div.transition()
+               .duration(300)
+               .style('opacity', 0)
+          })
 
-
-
-
-    });
-
+  })
   </script>
 </body>
 </html>
