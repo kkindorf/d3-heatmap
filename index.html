@@ -10,6 +10,7 @@
   body {
     font: 10px sans-serif;
   }
+
   .axis path,
   .axis line {
     fill: none;
@@ -22,7 +23,7 @@
    text-align: center;
    width: 130px;
    height: 50px;
-   paddng: 10px;
+   padding: 10px;
    font: 14px sans-serif;
    background: gray;
    border: 0px;
@@ -32,10 +33,12 @@
  }
  article {
    width: 1100px;
+   margin: 0 auto;
  }
- header h1, h3, p {
+ header {
    text-align: center;
  }
+ 
  h1 {
    font-size: 32px;
  }
@@ -59,7 +62,6 @@
         <svg class="chart">
     </svg>
     </div>
-
 </article>
   <script>
 
@@ -70,6 +72,7 @@
     height = 700 - margin.top - margin.bottom,
     colors = ['#EDF8B1',  '#3D922E',   '#84C579', '#A173F9', '#7E79C5', '#E3F967'];
 
+//we'll be using these ordinal scales to position the rects further down starting on line 180
     var x = d3.scale.ordinal()
         .rangeBands([0, width], 1.5);//the 1.5 gives us space away from y axis
 
